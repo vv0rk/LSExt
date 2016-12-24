@@ -6,6 +6,9 @@
 
 <h2>Home</h2>
 
+
+
+
 @(Html.DevExtreme().DataGrid()
     .ShowBorders(true)
     .DataSource(d => d.WebApi().Controller("Orders").Key("OrderID"))

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="lansweeperdb" Class="rPersonalDBDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="WebSettings" ConnectionString="Data Source=TEST1\SQLEXPRESS;Initial Catalog=lansweeperdb;Persist Security Info=True;User ID=sa" SettingsObjectName="System.Configuration.ConfigurationManager.ConnectionStrings" SettingsPropertyName="lansweeperdbConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.rPersonal" Member="rPersonals">
+    <Type Name="rPersonal">
+      <Column Name="id" Type="System.Int64" DbType="BigInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="moddate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="Company" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Filial" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Departament" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Upravlenie" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Otdel" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Grupa" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Tabel" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Dolgnost" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="FIO" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Familia" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Imya" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Otchestvo" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Daterp" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="DateUvol" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="Status" Type="System.String" DbType="NVarChar(10)" CanBeNull="true" />
+    </Type>
+  </Table>
+</Database>
