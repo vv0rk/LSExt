@@ -170,6 +170,19 @@ CREATE TABLE [dbo].rSetRMHist
 
 );
 
+-- Сопоставление модели распознанной и модели из справочника
+CREATE TABLE [dbo].rModelLink
+(
+	[Id] INT Not null identity(1,1) primary key,
+	-- заполняется из AssetCustom.Model с distinct
+	ModelAsset nvarchar(255) null,		
+		Constraint AK_ModelAsset Unique(ModelAsset),
+	-- заполняется из rModelDevice и потом пишется в AssetCustom9
+	ModelSprav nvarchar(255) null,
+		Constraint FK_rModelLink_rModelDevice_Model foreign key (ModelSprav)
+			references rModelDevice(Model)
+			on update Cascade
+);
 
 
 -- ###################### TRIGGERS
@@ -179,7 +192,6 @@ GO
 
 SET QUOTED_IDENTIFIER ON
 GO
-
 
 -- =============================================
 -- Author:		<Author,Savin,Nikolay>
@@ -344,4 +356,48 @@ BEGIN
 END
 
 GO
+
+-- =============================================
+-- Author:		<Author,Savin,Nikolay>
+-- Create date: <Create Date,25/12/2016,>
+-- Description:	<Когда добавляем запись в таблицу rModelLink обновляются Custom9 в таблицах tblAssetCustom и rAsset для всех где совпадают
+-- rModelLink.ModelAsset и tblAssetCustom.Model>
+-- =============================================
+create trigger trigger_rModelLink_update
+on [dbo].[rModelLink] for update
+as
+begin
+	-- set nocount on added to prevent extra result sets from
+	-- interfering with select statements.
+	set nocount on;
+
+with c as (
+	select 
+		ac.AssetID,
+		ac.Model,
+		ac.Custom9 as Custom9_tgt,
+		ml.ModelAsset as Custom9_check,
+		ml.ModelSprav as Custom9_src
+	
+	from inserted as ml 
+	inner join dbo.tblAssetCustom as ac on ml.ModelAsset =ac.Model 
+)
+update c set 
+Custom9_tgt = Custom9_src;
+
+with c as (
+	select 
+		ac.AssetID,
+		ac.Model,
+		ac.Custom9 as Custom9_tgt,
+		ml.ModelAsset as Custom9_check,
+		ml.ModelSprav as Custom9_src
+	
+	from dbo.rModelLink as ml 
+	inner join dbo.rAsset as ac on ml.ModelAsset =ac.Model 
+)
+update c set 
+Custom9_tgt = Custom9_src;
+
+end
 

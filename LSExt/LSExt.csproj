@@ -269,6 +269,7 @@
     <Content Include="SQLscript\GRANT_ACCESS.sql" />
     <Content Include="SQLscript\InsertInto.sql" />
     <Content Include="SQLscript\InsertKeyColumn.sql" />
+    <Content Include="SQLscript\REPORTS LANSWEEPER.sql" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
