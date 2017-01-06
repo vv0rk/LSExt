@@ -31,8 +31,8 @@ BEGIN
 	delete from [dbo].rMaterialLink
 	where [dbo].rMaterialLink.IdOriginal = @id
 
-	delete from [dbo].rMaterialAnalog
-	where [dbo].rMaterialAnalog.PartNumber = @partnumber
+	--delete from [dbo].rMaterialAnalog
+	--where [dbo].rMaterialAnalog.PartNumber = @partnumber
 
 
 END
