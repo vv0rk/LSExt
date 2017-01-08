@@ -441,7 +441,7 @@ as
 
 		set @status = (
 			select ts.Status
-			from deleted as i
+			from inserted as i
 			inner join dbo.rTransfer as t on i.IdTransfer = t.Id
 			inner join dbo.rTransferStatus as ts on t.IdStatus = ts.Id )
 
@@ -492,7 +492,7 @@ as
 
 		set @status = (
 			select ts.Status
-			from deleted as i
+			from inserted as i
 			inner join dbo.rTransfer as t on i.IdTransfer = t.Id
 			inner join dbo.rTransferStatus as ts on t.IdStatus = ts.Id )
 

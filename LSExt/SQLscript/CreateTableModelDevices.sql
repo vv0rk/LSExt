@@ -5,6 +5,14 @@ go
 drop table [dbo].rModelComplect
 drop table [dbo].rModelDevice
 
+-- “аблица со статусами расходных материалов в комплектах 
+-- выбрать среди всех материалов те, которые будут использоватьс€ при за€вках
+-- например 2 картриджа обычный и большой емкости, тот который хотим заказать ставим статус ƒј
+Create table rModelComplectStatus
+(
+	[Id]	Int not null identity(1,1) primary key,
+	[Status]	nvarchar(3) not null 
+)
 
 -- “аблица с модел€ми устройств (модели всех устройств должны быть приведены в соответствие с этой таблицей)
 CREATE TABLE [dbo].rModelDevice
@@ -29,7 +37,10 @@ CREATE TABLE [dbo].rModelComplect
 			References rModelDevice (Id),
 	[IdMaterialOriginal] INT NOT NULL,
 		Constraint FK_rMaterialOriginal_rModelComplect_Id FOREIGN KEY (IdMaterialOriginal)
-			References rMaterialOriginal (Id)
+			References rMaterialOriginal (Id),
+	[IdStatus] Int Not Null default 1,
+		Constraint FK_rModelComplect_rModelComplectStatus_IdStatus foreign key (IdStatus)
+			references rModelComplectStatus(Id)
 );
 
 

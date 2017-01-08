@@ -248,6 +248,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQLscript\AlterTableRashod.sql" />
+    <Content Include="SQLscript\AlterTableRashod_v2.sql" />
     <Content Include="SQLscript\CreateTableManufacturer.sql">
       <SubType>Code</SubType>
     </Content>
@@ -270,6 +271,7 @@
     <Content Include="SQLscript\InsertInto.sql" />
     <Content Include="SQLscript\InsertKeyColumn.sql" />
     <Content Include="SQLscript\REPORTS LANSWEEPER.sql" />
+    <Content Include="SQLscript\Скрипты для подсчета баланса.sql" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

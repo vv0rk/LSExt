@@ -86,6 +86,10 @@ CREATE TABLE [dbo].rMaterialRashod
 	-- надо сделать связь с rRashoMaterial по полю Артикул
 	Constraint FK_rMaterialAnalog_rMaterailRashod_IdMaterialAnalog FOREIGN KEY (IdMaterialAnalog)
 		References rMaterialAnalog (Id),
+	-- вспомогательное поле для списания номенклатур
+	[Id1CSprav] int null,
+	Constraint FK_rMaterialRashod_r1CSprav_Id1CSprav foreign key (Id1CSprav)
+			References r1CSprav(Id),
 
 	-- количество отпечатанных страниц для этого устройства фиксируется в таблице history
 	[PrintedPages] INT, 
