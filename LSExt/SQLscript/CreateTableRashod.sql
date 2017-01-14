@@ -93,9 +93,12 @@ CREATE TABLE [dbo].rMaterialRashod
 
 	-- количество отпечатанных страниц для этого устройства фиксируется в таблице history
 	[PrintedPages] INT, 
-	[Date] DATETIME DEFAULT CURRENT_TIMESTAMP
+	[Date] DATETIME DEFAULT CURRENT_TIMESTAMP,
 
+	[Comment] nvarchar(100) null
 );
+
+Create unique nonclustered index IX_rMaterialRashod_AssetID_PrintedPages on rMaterialRashod (AssetID, PrintedPages)
 
 
 -- Таблица с моделями устройств (модели всех устройств должны быть приведены в соответствие с этой таблицей)

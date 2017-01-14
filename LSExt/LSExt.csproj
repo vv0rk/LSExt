@@ -270,6 +270,9 @@
     <Content Include="SQLscript\GRANT_ACCESS.sql" />
     <Content Include="SQLscript\InsertInto.sql" />
     <Content Include="SQLscript\InsertKeyColumn.sql" />
+    <Content Include="SQLscript\IP Location.sql" />
+    <Content Include="SQLscript\Modify_v1.sql" />
+    <Content Include="SQLscript\r1CActive.sql" />
     <Content Include="SQLscript\REPORTS LANSWEEPER.sql" />
     <Content Include="SQLscript\Скрипты для подсчета баланса.sql" />
     <Content Include="Web.config">

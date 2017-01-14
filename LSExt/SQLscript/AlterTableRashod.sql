@@ -318,6 +318,8 @@ if OBJECT_ID (N'rTransferSpec') is null
 			[IdOriginal] int not null,
 			Constraint FK_rTransfer_rOriginal_IdOriginal foreign key (IdOriginal)
 				references rMaterialOriginal(Id),
+
+
 			[Number] int not null,
 
 			[IdUserCreate] int null

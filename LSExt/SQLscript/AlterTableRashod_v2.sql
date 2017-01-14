@@ -1,6 +1,7 @@
 use lansweeperdb;
 
 -- эти изменения 06.01.2017 после применения на продакшн сервере Lansweeper
+-- видео где показано как заполнить то что нам надо при выборе combobox на форме http://www.blueclaw-db.com/comboboxlist/fill_field_from_combo_box.htm
 
 SET ANSI_NULLS ON
 GO
@@ -57,9 +58,11 @@ begin;
 		inner join dbo.rmateriallink as ml on cs.IdAnalog = ml.idanalog
 		inner join dbo.rmodelcomplect as mc on ml.idoriginal = mc.idmaterialoriginal
 		inner join dbo.rmodeldevice as md on mc.idmodel = md.id
-		inner join dbo.tblassetcustom as ac on mr.assetid = ac.assetid
+		inner join [dbo].rModelLink as mol on md.Model = mol.ModelSprav
+		inner join [dbo].tblAssetCustom as ac on mr.AssetId = ac.AssetID
 
-		where md.model = ac.model
+		where mol.ModelAsset = ac.Model
+
 		)
 		begin;
 			raiserror(50005,10,1,@Msg)
@@ -156,11 +159,16 @@ if OBJECT_ID (N'rSclad') is null
 		(
 			[Id] int not null identity(1,1) primary key,
 			[Company] nvarchar(100) not null,
+			[ScladName] nvarchar(100) not null,
 			[Gorod] nvarchar(50) not null,
 			[Address] nvarchar(255) not null,
 			[Respons] nvarchar(100) not null
 		)
 	end; 
+else 
+	begin;
+		Alter table dbo.rSclad add ScladName nvarchar(100) not null default 1;
+	end;
 
 -- приходный ордер для приходования товара на склад
 if OBJECT_ID (N'rPrihod') is null
@@ -200,6 +208,49 @@ if not exists (
 	begin;
 		Alter table rMaterialRashod add Number Int Not Null default 1
 	end;
+
+-- если составного ключа нет, то создаем его
+if OBJECT_ID (N'rMaterialRashod') is not null
+	begin;
+		if not exists (select name from sys.indexes where name = N'IX_rMaterialRashod_AssetID_PrintedPages')
+			begin;
+				Create unique nonclustered index IX_rMaterialRashod_AssetID_PrintedPages on rMaterialRashod (AssetID, PrintedPages)
+			end;
+	end;
+
+-- добавляем поле комментарий к расходу 
+if not exists (
+			select * 
+			from sys.columns 
+			where name = N'Comment' and Object_ID = Object_ID(N'rMaterialRashod'))
+	begin;
+		Alter table rMaterialRashod add	[Comment] nvarchar(100) null
+	end;
+
+
+-- добавляем столбцы для связи с rMaterialRashod в таблицы
+-- rSetRMhist rPrintHist
+if not exists (
+			select * 
+			from sys.columns 
+			where name = N'IdMaterialRashod' and Object_ID = Object_ID(N'rSetRMhist'))
+	begin;
+		Alter table dbo.rSetRMHist add IdMaterialRashod Int Null
+		Alter table dbo.rSetRMHist add Constraint FK_rSetRMHist_rRashodMaterial_IdMaterialRashod foreign key (IdMaterialRashod)
+			references rMaterialRashod(Id) on delete CASCADE
+	end;
+
+if not exists (
+			select * 
+			from sys.columns 
+			where name = N'IdMaterialRashod' and Object_ID = Object_ID(N'rPrintHist'))
+	begin;
+		Alter table dbo.rPrintHist add IdMaterialRashod Int Null
+		Alter table dbo.rPrintHist add Constraint FK_rPrintHist_rRashodMaterial_IdMaterialRashod foreign key (IdMaterialRashod)
+			references rMaterialRashod(Id) on delete CASCADE
+	end;
+
+
 
 if OBJECT_ID (N'rMaterialRashod.IdSclad') is null
 	begin;
@@ -284,9 +335,9 @@ if OBJECT_ID (N'rTransferSpec') is null
 				references rTransfer(Id)
 				on delete cascade,
 			-- в передаче должно участвовать только то что пришло по складу 1С, надо двигать то что пришло
-			--[IdOriginal] int not null,
-			--Constraint FK_rTransfer_rOriginal_IdOriginal foreign key (IdOriginal)
-			--	references rMaterialOriginal(Id),
+			[IdOriginal] int null,
+			Constraint FK_rTransfer_rOriginal_IdOriginal foreign key (IdOriginal)
+				references rMaterialOriginal(Id),
 			[Id1CSprav] int not null,
 			Constraint FK_rTransferSpec_r1CSprav_Id foreign key (Id1CSprav)
 				references r1CSprav(Id),
@@ -306,8 +357,8 @@ if OBJECT_ID (N'rTransferSpec') is null
 else
 	begin;
 	-- перенос между складами выполняем над сущностями 1С 
-		alter table dbo.rTransferSpec drop constraint FK_rTransfer_rOriginal_IdOriginal;
-		alter table dbo.rTransferSpec drop column IdOriginal;
+		--alter table dbo.rTransferSpec drop constraint FK_rTransfer_rOriginal_IdOriginal;
+		--alter table dbo.rTransferSpec drop column IdOriginal;
 
 		alter table dbo.rTransferSpec add Id1CSprav int not null;
 		alter table dbo.rTransferSpec add constraint FK_rTransferSpec_r1CSprav_Id foreign key (Id1CSprav)
@@ -341,6 +392,7 @@ as
 				rollback transaction
 			end;
 
+		-- перед тем как добавить материал на перемещение
 
 
 		set @user = USER_NAME()
