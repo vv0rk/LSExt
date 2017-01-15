@@ -249,6 +249,7 @@
   <ItemGroup>
     <Content Include="SQLscript\AlterTableRashod.sql" />
     <Content Include="SQLscript\AlterTableRashod_v2.sql" />
+    <Content Include="SQLscript\Caclulate RM requirements.sql" />
     <Content Include="SQLscript\CreateTableManufacturer.sql">
       <SubType>Code</SubType>
     </Content>
