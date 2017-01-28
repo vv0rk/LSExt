@@ -116,6 +116,10 @@ Create table rMaterialSvodRes
 	ModelAsset nvarchar(255) null,
 	PartNumber nvarchar(100) null,
 	Resource int null,
+	IdSclad int null,
+	Constraint FK_rMaterialSvod_rSclad_IdSclad foreign key (IdSclad)
+		references rSclad(Id),
+	PercentRes int not null default 100,
 	Januar int null, 
 	Februar int null, 
 	March int null, 
@@ -142,6 +146,10 @@ Create table rMaterialSvod
 	ModelAsset nvarchar(255) null,
 	PartNumber nvarchar(100) null,
 	Resource int null,
+	IdSclad int null,
+	Constraint FK_rMaterialSvod_rSclad_IdSclad foreign key (IdSclad)
+		references rSclad(Id),
+	PercentRes int not null default 100,
 	Januar int null, 
 	Februar int null, 
 	March int null, 
@@ -155,6 +163,15 @@ Create table rMaterialSvod
 	November int null,
 	December int null
 )
+
+-- Модификация таблиц rMaterialSvod и rMaterialSvodRes
+alter table rMaterialSvod add IdSclad int null;
+alter table rMaterialSvod add Constraint FK_rMaterialSvod_rSclad_IdSclad foreign key (IdSclad) references rSclad(Id);
+alter table rMaterialSvod add 	PercentRes int not null default 100;
+
+alter table rMaterialSvodRes add IdSclad int null;
+alter table rMaterialSvodRes add Constraint FK_rMaterialSvodRes_rSclad_IdSclad foreign key (IdSclad) references rSclad(Id);
+alter table rMaterialSvodRes add PercentRes int not null default 100;
 
 
 /* FillrMaterialSvod
@@ -330,10 +347,6 @@ from (
 	where Number <> 0 --and src.Gorod = N'Иркутск'
 	group by s.IdSclad, s.IdMaterialOriginal
 ) as src
-
-
-
-
 
 
 /*  ВНЕСЕНО В ПРОДАКШН
