@@ -2,6 +2,12 @@ use lansweeperdb;
 
 go
 
+/* 
+	Create rSclad1CSprav
+	в этой таблице подводим баланс материалов на складе в терминах 1С
+	этот формат используется для прихода товара на склад и для списания 
+	в бухгалтерии
+*/
 if object_id (N'rSclad1CSprav') is null
 begin;
 	Create table dbo.rSclad1CSprav (
@@ -13,8 +19,18 @@ begin;
 		Constraint FK_rSclad1CSprav_r1CSprav_Id1CSprav foreign key (Id1CSprav)
 			references r1CSprav(Id),
 		Number int null,
+		NumberInvent int null
 	)
 end;
+
+/* столбец в котором мы вносим количество, полученное при инвентаризации */
+IF NOT EXISTS(SELECT *
+          FROM   INFORMATION_SCHEMA.COLUMNS
+          WHERE  TABLE_NAME = 'rSclad1CSprav'
+                 AND COLUMN_NAME = 'NumberInvent') 
+	begin;
+		alter table dbo.rSclad1CSprav add NumberInvent int null
+	end; 
 
 if exists (select name from sys.indexes
 			where name = N'IX_rSclad1CSprav_IdSclad_Id1CSprav')
@@ -30,147 +46,140 @@ else
 		on dbo.rSclad1CSprav (IdSclad, Id1CSprav)
 	end;
 
-
 go
 
-delete from dbo.rSclad1CSprav
-
-go
-
-
-insert into dbo.rSclad1CSprav (
+/*
+	необходимо добавлять записи материалов которых еще нет 
+	периодический запуск в скрипте
+*/
+insert into dbo.rSclad1CSprav(
 	IdSclad
 	, Id1CSprav
-	, Number
 )
-
-select
-	smo.IdSclad
-	, smo.Id1CSprav
-	, smon.Number
-from (
-	select 
-		s.Id as IdSclad
-		, mo.Id as Id1CSprav
-	from (
-		select 
-			s.Id
-		from dbo.rSclad as s
-	) as s
-	cross join (
-		select 
-			mo.Id
-		from dbo.r1CSprav as mo
-	) as mo
-) as smo
-left join (
 select 
-	src.IdSclad
-	, src.Id1CSprav
-	, src.Number
-from (
+	s.Id
+	, cs.Id
+from dbo.rSclad as s
+cross join dbo.r1CSprav as cs
+left join dbo.rSclad1CSprav as ss on s.Id = ss.IdSclad and cs.Id = ss.Id1CSprav
+where ss.Id is null
+	
+/*
+	пересчет и обновление баланса по складу
+*/
+with c as (
 	select
-		s.IdSclad
-		, s.Id1CSprav
-		-- pr + pt - rt - mr
-		, isnull(sum(pr.Number),0) + isnull(sum(pt.Number),0) - isnull(sum(rt.Number),0) - isnull(sum(mr.Number),0) as Number
+		smo.Number as Number_tgt
+		,smon.Number as Number_src
+	from dbo.rSclad1CSprav as smo
 
+	left join (
+	select 
+		src.IdSclad
+		, src.Id1CSprav
+		, src.Number
 	from (
-		select 
-			s.Id as IdSclad
-			, mo.Id as Id1CSprav
-		from dbo.rSclad s cross join dbo.r1CSprav mo
-	) as s
+		select
+			s.IdSclad
+			, s.Id1CSprav
+			-- pr + pt - rt - mr
+			, isnull(sum(pr.Number),0) + isnull(sum(pt.Number),0) - isnull(sum(rt.Number),0) - isnull(sum(mr.Number),0) as Number
 
-	/* Суммируем все приходы!!!
-	   обязательно для всех 1С позиций которые мы хотим отслеживать должны выполняться условия:
-	   1. Номенклатура в расходе должна присуствовать в r1CSprav
-	   2. Номенклатура в справочнике должна иметь соответствие в rMaterialAnalog
-			в таблицк r1CSprav имеется поле связи IdAnalog int
-	   3. Запись из rMaterialAnalog должна быть связана с r1CSprav (через rMaterialLink)
-	*/ 
-	left join (
-		select 
-			s.Id as IdSclad
-			, cs.nrNom
-			, cs.Id as Id1CSprav
-			, sum(ps.Nr) as Number
-		from dbo.rPrihod as p
-		inner join dbo.rPrihodSpec as ps on p.Id = ps.IdPrihod
-		inner join dbo.rSclad as s on p.IdSclad = s.Id
-		inner join dbo.r1CSprav as cs on ps.Id1CSprav = cs.Id
+		from dbo.rSclad1CSprav as s
 
-		group by s.Id, cs.Id, cs.nrNom
-	) as pr on s.IdSclad = pr.IdSclad and s.Id1CSprav = pr.Id1CSprav
+		/* Суммируем все приходы!!!
+		   обязательно для всех 1С позиций которые мы хотим отслеживать должны выполняться условия:
+		   1. Номенклатура в расходе должна присуствовать в r1CSprav
+		   2. Номенклатура в справочнике должна иметь соответствие в rMaterialAnalog
+				в таблицк r1CSprav имеется поле связи IdAnalog int
+		   3. Запись из rMaterialAnalog должна быть связана с r1CSprav (через rMaterialLink)
+		*/ 
+		left join (
+			select 
+				s.Id as IdSclad
+				, cs.nrNom
+				, cs.Id as Id1CSprav
+				, sum(ps.Nr) as Number
+			from dbo.rPrihod as p
+			inner join dbo.rPrihodSpec as ps on p.Id = ps.IdPrihod
+			inner join dbo.rSclad as s on p.IdSclad = s.Id
+			inner join dbo.r1CSprav as cs on ps.Id1CSprav = cs.Id
 
-	/*
-		Суммируем перемещения по складу Назначения со статусом перемещения ВЫПОЛНЕНО
-		на целевые склады
-	*/
-	left join (
-		select 
-			s.Id as IdSclad
-			, cs.Id as Id1CSprav
-			, cs.nrNom as PartNumber
-			, sum (ts.Number) as Number
+			group by s.Id, cs.Id, cs.nrNom
+		) as pr on s.IdSclad = pr.IdSclad and s.Id1CSprav = pr.Id1CSprav
 
-		from dbo.rTransfer as t
-		inner join dbo.rSclad as s on t.IdScladTarget = s.Id
-		inner join dbo.rTransferSpec as ts on t.Id = ts.IdTransfer
-		inner join dbo.rTransferStatus as tst on t.IdStatus = tst.Id
-		inner join dbo.r1CSprav as cs on ts.Id1CSprav = cs.Id
+		/*
+			Суммируем перемещения по складу Назначения со статусом перемещения ВЫПОЛНЕНО
+			на целевые склады
+		*/
+		left join (
+			select 
+				s.Id as IdSclad
+				, cs.Id as Id1CSprav
+				, cs.nrNom as PartNumber
+				, sum (ts.Number) as Number
 
-		where tst.Status like N'В%'
+			from dbo.rTransfer as t
+			inner join dbo.rSclad as s on t.IdScladTarget = s.Id
+			inner join dbo.rTransferSpec as ts on t.Id = ts.IdTransfer
+			inner join dbo.rTransferStatus as tst on t.IdStatus = tst.Id
+			inner join dbo.r1CSprav as cs on ts.Id1CSprav = cs.Id
 
-		Group by s.Id, cs.Id, cs.nrNom 
-	) as pt on s.IdSclad = pt.IdSclad and s.Id1CSprav = pt.Id1CSprav
+			where tst.Status like N'В%'
 
-	/*
-		Суммируем перемещения по складу Источника со статусом перемещения ВЫПОЛНЕНО
-		на целевые склады
-		будет использоваться для вычета из запаса на складе
-	*/
-	left join (
-		select 
-			s.Id as IdSclad
-			, cs.Id as Id1CSprav
-			, cs.nrNom as PartNumber
-			, sum (ts.Number) as Number
+			Group by s.Id, cs.Id, cs.nrNom 
+		) as pt on s.IdSclad = pt.IdSclad and s.Id1CSprav = pt.Id1CSprav
 
-		from dbo.rTransfer as t
-		inner join dbo.rSclad as s on t.IdScladSource = s.Id
-		inner join dbo.rTransferSpec as ts on t.Id = ts.IdTransfer
-		inner join dbo.rTransferStatus as tst on t.IdStatus = tst.Id
-		inner join dbo.r1CSprav as cs on ts.Id1CSprav = cs.Id
+		/*
+			Суммируем перемещения по складу Источника со статусом перемещения ВЫПОЛНЕНО
+			на целевые склады
+			будет использоваться для вычета из запаса на складе
+		*/
+		left join (
+			select 
+				s.Id as IdSclad
+				, cs.Id as Id1CSprav
+				, cs.nrNom as PartNumber
+				, sum (ts.Number) as Number
 
-		where tst.Status like N'В%'
+			from dbo.rTransfer as t
+			inner join dbo.rSclad as s on t.IdScladSource = s.Id
+			inner join dbo.rTransferSpec as ts on t.Id = ts.IdTransfer
+			inner join dbo.rTransferStatus as tst on t.IdStatus = tst.Id
+			inner join dbo.r1CSprav as cs on ts.Id1CSprav = cs.Id
 
-		Group by s.Id, cs.Id, cs.nrNom 
-	) as rt on s.IdSclad = rt.IdSclad and s.Id1CSprav = rt.Id1CSprav
+			where tst.Status like N'В%'
 
-	/* 
-		Суммируем все операции расхода со склада
-		вычитается из склада источника
-	*/
-	left join (
-		select 
-			s.Id as IdSclad
-			, mo.Id as Id1CSprav
-			, mo.nrNom as PartNumber
-			, sum (mr.Number) as Number
-		from dbo.rMaterialRashod as mr
-		inner join dbo.rSclad as s on mr.IdSclad = s.Id
-		inner join dbo.r1CSprav as mo on mr.Id1CSprav = mo.Id
+			Group by s.Id, cs.Id, cs.nrNom 
+		) as rt on s.IdSclad = rt.IdSclad and s.Id1CSprav = rt.Id1CSprav
 
-		Group by s.Id, mo.Id, mo.nrNom
-	) as mr on s.IdSclad = mr.IdSclad and s.Id1CSprav = mr.Id1CSprav
+		/* 
+			Суммируем все операции расхода со склада
+			вычитается из склада источника
+		*/
+		left join (
+			select 
+				s.Id as IdSclad
+				, mo.Id as Id1CSprav
+				, mo.nrNom as PartNumber
+				, sum (mr.Number) as Number
+			from dbo.rMaterialRashod as mr
+			inner join dbo.rSclad as s on mr.IdSclad = s.Id
+			inner join dbo.r1CSprav as mo on mr.Id1CSprav = mo.Id
 
-	group by s.IdSclad, s.Id1CSprav
+			Group by s.Id, mo.Id, mo.nrNom
+		) as mr on s.IdSclad = mr.IdSclad and s.Id1CSprav = mr.Id1CSprav
 
-) as src
+		group by s.IdSclad, s.Id1CSprav
 
-inner join dbo.rSclad as s on src.IdSclad = s.Id
+	) as src
 
-where src.Number <> 0 --and src.Gorod = N'Иркутск'
---order by src.IdSclad, src.Number
-) as smon on smo.IdSclad = smon.IdSclad and smo.Id1CSprav = smon.Id1CSprav
+	inner join dbo.rSclad as s on src.IdSclad = s.Id
+
+	where src.Number <> 0 --and src.Gorod = N'Иркутск'
+	--order by src.IdSclad, src.Number
+	) as smon on smo.IdSclad = smon.IdSclad and smo.Id1CSprav = smon.Id1CSprav
+
+)
+update c set 
+Number_tgt = Number_src;

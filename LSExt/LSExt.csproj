@@ -254,7 +254,9 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="SQLscript\CreateTableModelDevices.sql" />
+    <Content Include="SQLscript\rAssetMaterialIntence.sql" />
     <Content Include="SQLscript\rScladMaterial1C.sql" />
+    <Content Include="SQLscript\rScladMaterialAnalog.sql" />
     <Content Include="SQLscript\ScriptCalculateBalance.sql" />
     <Content Include="SQLscript\rAssetsScladLink.sql" />
     <Content Include="SQLscript\rAsset.sql" />
@@ -281,6 +283,8 @@
     <Content Include="SQLscript\r1CActive.sql" />
     <Content Include="SQLscript\REPORTS LANSWEEPER.sql" />
     <Content Include="SQLscript\rScladMaterialOriginal.sql" />
+    <Content Include="SQLscript\Скрипт обновл количества по складам.sql" />
+    <Content Include="SQLscript\Скрипт обновл номенкл по складам.sql" />
     <Content Include="SQLscript\Скрипты для подсчета баланса.sql" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>

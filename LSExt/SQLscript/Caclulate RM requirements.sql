@@ -46,6 +46,9 @@ order by pvt.AssetId
 -- Lansweeper не может обработать запрос Pivot, поэтому выводиться будет в Lansweeper 
 -- через промежуточную таблицу rMaterialSvod 
 -- из этой таблицы в макросе рассчитывается таблица rMaterialSvodRes
+-- ключем является AssetId, PartNumber
+-- это будет рабочая таблица в которую данные будут добавляеться и удаляться периодический
+-- и дозированно при помощи запросов
 select 
 	a.AssetID
 	, mo.ModelSprav
@@ -120,6 +123,8 @@ Create table rMaterialSvodRes
 	Constraint FK_rMaterialSvod_rSclad_IdSclad foreign key (IdSclad)
 		references rSclad(Id),
 	PercentRes int not null default 100,
+	ScladRemain int null,
+	Intence float(24) not null default 1,
 	Januar int null, 
 	Februar int null, 
 	March int null, 
@@ -150,6 +155,8 @@ Create table rMaterialSvod
 	Constraint FK_rMaterialSvod_rSclad_IdSclad foreign key (IdSclad)
 		references rSclad(Id),
 	PercentRes int not null default 100,
+	ScladRemain int null,
+	Intence float(24) not null default 1,
 	Januar int null, 
 	Februar int null, 
 	March int null, 
@@ -167,11 +174,16 @@ Create table rMaterialSvod
 -- Модификация таблиц rMaterialSvod и rMaterialSvodRes
 alter table rMaterialSvod add IdSclad int null;
 alter table rMaterialSvod add Constraint FK_rMaterialSvod_rSclad_IdSclad foreign key (IdSclad) references rSclad(Id);
-alter table rMaterialSvod add 	PercentRes int not null default 100;
+alter table rMaterialSvod add PercentRes int not null default 100;
+alter table rMaterialSvod add ScladRemain int null;
+alter table rMaterialSvod add Intence float(24) not null default 1;
 
 alter table rMaterialSvodRes add IdSclad int null;
 alter table rMaterialSvodRes add Constraint FK_rMaterialSvodRes_rSclad_IdSclad foreign key (IdSclad) references rSclad(Id);
 alter table rMaterialSvodRes add PercentRes int not null default 100;
+alter table rMaterialSvodRes add ScladRemain int null;
+alter table rMaterialSvodRes add Intence float(24) not null default 1;
+
 
 
 /* FillrMaterialSvod
@@ -255,99 +267,6 @@ left join (
 	inner join dbo.rModelDevice as md on mc.IdModel = md.Id
 	inner join dbo.rModelLink as ml on ml.ModelSprav = md.Model
 ) as mo on ac.Model = mo.ModelAsset
-
-/*
-	Заполнение таблицы rScladMaterialOriginal
-	значения этой таблицы расчитываются для того, чтобы было проще использовать эти значения
-*/
-
-Insert into dbo.rScladMaterialOriginal (
-	IdSclad
-	, IdMaterialOriginal
-	, Number
-)
-select 
-	src.IdSclad
-	, src.IdMaterialOriginal
-	, src.Number
-from (
-	select
-		s.IdSclad as IdSclad
-		, s.IdMaterialOriginal as IdMaterialOriginal
-		, isnull(sum(pr.Number),0) + isnull(sum(pt.Number),0) - isnull(sum(rt.Number),0) - isnull(sum(mr.Number),0) as Number
-
-	from (
-		select 
-			s.Id as IdSclad
-			, mo.Id as IdMaterialOriginal
-		from dbo.rSclad s cross join dbo.rMaterialOriginal mo
-	) as s
-
-	left join (
-		select 
-			s.Id as IdSclad
-			, mo.Id as IdMaterialOriginal
-			, sum(ps.Nr) as Number
-		from dbo.rPrihod as p
-		inner join dbo.rPrihodSpec as ps on p.Id = ps.IdPrihod
-		inner join dbo.rSclad as s on p.IdSclad = s.Id
-		inner join dbo.r1CSprav as cs on ps.Id1CSprav = cs.Id
-		inner join dbo.rMaterialAnalog as ma on cs.IdAnalog = ma.Id
-		inner join dbo.rMaterialLink as ml on ma.Id = ml.IdAnalog
-		inner join dbo.rMaterialOriginal as mo on ml.IdOriginal = mo.Id
-
-		group by s.Id, mo.Id
-	) as pr on s.IdSclad = pr.IdSclad and s.IdMaterialOriginal = pr.IdMaterialOriginal
-
-	left join (
-		select 
-			s.Id as IdSclad
-			, mo.Id as IdMaterialOriginal
-			, sum (ts.Number) as Number
-
-		from dbo.rTransfer as t
-		inner join dbo.rSclad as s on t.IdScladTarget = s.Id
-		inner join dbo.rTransferSpec as ts on t.Id = ts.IdTransfer
-		inner join dbo.rTransferStatus as tst on t.IdStatus = tst.Id
-		inner join dbo.rMaterialOriginal as mo on ts.IdOriginal = mo.Id
-		where tst.Status like N'В%'
-
-		Group by s.Id, mo.Id
-	) as pt on s.IdSclad = pt.IdSclad and s.IdMaterialOriginal = pt.IdMaterialOriginal
-
-	left join (
-		select 
-			s.Id		as IdSclad
-			, mo.Id	as IdMaterialOriginal
-			, sum (ts.Number) as Number
-
-		from dbo.rTransfer as t
-		inner join dbo.rSclad as s on t.IdScladSource = s.Id
-		inner join dbo.rTransferSpec as ts on t.Id = ts.IdTransfer
-		inner join dbo.rTransferStatus as tst on t.IdStatus = tst.Id
-		inner join dbo.rMaterialOriginal as mo on ts.IdOriginal = mo.Id
-		where tst.Status like N'В%'
-
-		Group by s.Id, mo.Id
-	) as rt on s.IdSclad = rt.IdSclad and s.IdMaterialOriginal = rt.IdMaterialOriginal
-
-	left join (
-		select 
-			s.Id as IdSclad
-			, mo.Id as IdMaterialOriginal
-			, sum (mr.Number) as Number
-		from dbo.rMaterialRashod as mr
-		inner join dbo.rSclad as s on mr.IdSclad = s.Id
-		inner join dbo.rMaterialLink as ml on mr.IdMaterialAnalog = ml.IdAnalog
-		inner join dbo.rMaterialOriginal as mo on ml.IdOriginal = mo.Id
-
-		Group by s.Id, mo.Id
-	) as mr on s.IdSclad = mr.IdSclad and s.IdMaterialOriginal = mr.IdMaterialOriginal
-	
-	where Number <> 0 --and src.Gorod = N'Иркутск'
-	group by s.IdSclad, s.IdMaterialOriginal
-) as src
-
 
 /*  ВНЕСЕНО В ПРОДАКШН
 Таблица связи Assets и Склад 
