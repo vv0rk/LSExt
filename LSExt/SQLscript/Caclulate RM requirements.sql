@@ -185,10 +185,12 @@ alter table rMaterialSvodRes add ScladRemain int null;
 alter table rMaterialSvodRes add Intence float(24) not null default 1;
 
 
-
+-- !!!!!! РАБОЧИЙ ВАРИАНТ ЗАПУСКАЕТСЯ В РУЧНУЮ !!!!!!!!!!!
 /* FillrMaterialSvod
-Заполняем таблицу rMaterialSvod 
+	Заполняем таблицу rMaterialSvod 
 */
+delete from dbo.rMaterialSvod;
+
 insert into dbo.rMaterialSvod 
 (
 	AssetId,
@@ -207,7 +209,8 @@ insert into dbo.rMaterialSvod
 	September,
 	October,
 	November,
-	December
+	December,
+	ScladRemain
 )
 select 
 	a.AssetID
@@ -216,6 +219,7 @@ select
 	, mo.PartNumber
 	, mo.Resourc
 	, [1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12]
+	, smo.Number
 
 from dbo.tblAssets as a 
 inner join dbo.tblAssetCustom as ac on a.assetid = ac.AssetId 
@@ -253,10 +257,11 @@ inner join (
 		max(p.PrintedPages)
 		for p.mmonth in ([1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12])
 	) as pvt
-) as pvt on a.AssetID = pvt.AssetId
+	) as pvt on a.AssetID = pvt.AssetId
 left join (
 	select 
 	mo.PartNumber
+	, mo.Id as IdMaterialOriginal
 	, mo.Resource as Resourc
 	, md.Model as ModelSprav
 	, ml.ModelAsset as ModelAsset
@@ -266,32 +271,7 @@ left join (
 	inner join dbo.rModelComplectStatus as mcs on mcs.Id = mc.IdStatus and mcs.Status = N'ДА'
 	inner join dbo.rModelDevice as md on mc.IdModel = md.Id
 	inner join dbo.rModelLink as ml on ml.ModelSprav = md.Model
-) as mo on ac.Model = mo.ModelAsset
-
-/*  ВНЕСЕНО В ПРОДАКШН
-Таблица связи Assets и Склад 
-*/
-Create table rAssetsScladLink
-(
-	Id int not null identity(1,1) primary key,
-	AssetID int not null,
-	Constraint FK_rAssetsLink_rAsset_rAssetID foreign key (AssetId) 
-		references rAsset (AssetId),
-	IdSclad int null
-)
-
-/*  ВНЕСЕНО В ПРОДАКШН
-	Таблица остатков материалов на складах
-	rScladMaterialOriginal
-*/
-Create table rScladMaterialOriginal
-(
-	Id int not null Identity(1,1) primary key,
-	IdSclad int not null,
-	Constraint FK_rScladMaterialOriginal_rSclad_IdSclad foreign key (IdSclad)
-		references rSclad(Id),
-	IdMaterialOriginal int not null,
-	Constraint FK_rScladMaterialOriginal_rMaterialOriginal_IdMaterialOriginal foreign key (IdMaterialOriginal)
-		references rMaterialOriginal(Id),
-	Number int null
-)
+	) as mo on ac.Model = mo.ModelAsset
+left join dbo.rAssetsScladLink as asl on a.AssetId = asl.AssetId
+left join dbo.rSclad as ss on asl.IdSclad = ss.Id
+left join dbo.rScladMaterialOriginal as smo on asl.IdSclad = smo.IdSclad and mo.IdMaterialOriginal = smo.IdMaterialOriginal
