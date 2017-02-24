@@ -249,6 +249,12 @@ if OBJECT_ID (N'rMaterialRashod.IdSclad') is null
 			References rSclad(Id)
 	end;
 
+-- добавляем столбец расчетный сколько картридж отходил
+if OBJECT_ID (N'rMaterialRashod.ResourceFact') is null
+	begin;
+		Alter table rMaterialRashod add ResourceFact Int Null
+	end;
+
 go
 
 if OBJECT_ID (N'rUser') is null

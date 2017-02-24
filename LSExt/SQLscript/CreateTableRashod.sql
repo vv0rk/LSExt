@@ -408,3 +408,47 @@ Custom9_tgt = Custom9_src;
 
 end
 
+
+-- =============================================
+-- Author:		<Author,Savin,Nikolay>
+-- Create date: <Create Date,04/02/2017,>
+-- Description:	<расчитываем данные сколько этот картридж отпечатал>
+-- =============================================
+create trigger trigger_rMaterialRashodAll
+on [dbo].[rMaterialRashod] after insert, update, delete
+as
+begin
+	-- set nocount on added to prevent extra result sets from
+	-- interfering with select statements.
+	set nocount on;
+
+	with C as (
+	select 
+		mr.ResourceFact as ResourceFact_tgt
+		, p.ResourceFact as ResourceFact_src
+		, p.TonerNumber
+	from dbo.rMaterialRashod as mr
+	inner join (
+		select 
+			ROW_NUMBER() over( partition by mr.AssetId order by mr.Date) as Number
+			, mr.Id as Id
+			, mr.AssetId as AssetId
+			, ac.Model as 'ModelLS'
+			, md.Model as 'ModelSprav'
+			, mr.Date
+			, ma.PartNumber
+			, ma.Resource
+			, mr.PrintedPages as res
+			, lag(mr.PrintedPages) over( partition by mr.AssetId order by mr.Date) as prev
+			, mr.Number as 'TonerNumber'
+			, mr.PrintedPages - lag(mr.PrintedPages) over( partition by mr.AssetId order by mr.Date) as ResourceFact
+		from dbo.rMaterialRashod as mr
+		left join dbo.tblAssetCustom as ac on mr.AssetId = ac.AssetID
+		left join dbo.rModelLink as ml on ac.Model = ml.ModelAsset
+		left join dbo.rModelDevice as md on ml.ModelSprav = md.Model
+		inner join dbo.rMaterialAnalog as ma on mr.IdMaterialAnalog = ma.Id
+	) as p on mr.Id = p.Id
+) update C set
+	ResourceFact_tgt = ResourceFact_src;
+
+end

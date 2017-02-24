@@ -254,6 +254,10 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="SQLscript\CreateTableModelDevices.sql" />
+    <Content Include="SQLscript\rCompany%24.sql" />
+    <Content Include="SQLscript\rCompanyDogovor.sql" />
+    <Content Include="SQLscript\rPrintHist.sql" />
+    <Content Include="SQLscript\rAssetTransfer.sql" />
     <Content Include="SQLscript\rAssetMaterialIntence.sql" />
     <Content Include="SQLscript\rScladMaterial1C.sql" />
     <Content Include="SQLscript\rScladMaterialAnalog.sql" />

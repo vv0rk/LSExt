@@ -277,6 +277,7 @@ with c as (
 update c set 
 Number_tgt = Number_src;
 
+
 /*
 	Обновление остатков rScladMaterialOriginal
 */
@@ -379,3 +380,7 @@ with C as (
 	) as smon on smo.IdSclad = smon.IdSclad and smo.IdMaterialOriginal = smon.IdMaterialOriginal
 ) Update C set
 Number_tgt = Number_src;
+
+
+
+

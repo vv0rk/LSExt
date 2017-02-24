@@ -12,7 +12,8 @@ begin;
 		IdMaterialOriginal int not null,
 		Constraint FK_rScladMaterialOriginal_rMaterialOriginal_IdMaterialOriginal foreign key (IdMaterialOriginal)
 			references rMaterialOriginal(Id),
-		Number int null,
+		Number int null, -- количество материала в разрезе по складам
+		NumberC int null -- количество материала в разрезе по организациям
 	)
 end;
 
