@@ -254,8 +254,14 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="SQLscript\CreateTableModelDevices.sql" />
+    <Content Include="SQLscript\rActiveCategory1.sql" />
+    <Content Include="SQLscript\r1CSprav.sql" />
+    <Content Include="SQLscript\ScriptSyncronizeActiveCategory1.sql" />
+    <Content Include="SQLscript\tblAssets.sql" />
     <Content Include="SQLscript\rCompany%24.sql" />
     <Content Include="SQLscript\rCompanyDogovor.sql" />
+    <Content Include="SQLscript\r1CCategory.sql" />
+    <Content Include="SQLscript\rPrihod.sql" />
     <Content Include="SQLscript\rPrintHist.sql" />
     <Content Include="SQLscript\rAssetTransfer.sql" />
     <Content Include="SQLscript\rAssetMaterialIntence.sql" />

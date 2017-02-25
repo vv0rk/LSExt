@@ -156,40 +156,6 @@ begin;
 
 end;
 
-go
--- r1CSprav —правочник материалов и оборудовани€ 1—
-if OBJECT_ID (N'r1CSprav') is null
-	begin;
-		Create table r1CSprav
-		(
-			[Id] int not null identity(1,1) primary key,
-			[nrNom] nvarchar(50) null,
-			Constraint AK_r1CSprav_nrNom Unique(nrNom),
-			-- инвентарного є в приходе нет
-			--[nrInv] nvarchar(50) null,
-			--Constraint AK_r1CSprav_nrInv Unique(nrInv),
-			[name]  nvarchar(255) not null,
-			Constraint AK_r1CSprav_name Unique(name),
-			[nameLong] nvarchar(255) not null,
-			-- кажда€ позици€ в справочнике 1— прив€зываетс€ к аналогу однозначно.
-			[IdAnalog] int null,
-			Constraint FK_r1CSprav_rMaterialAnalog_Id foreign key (IdAnalog)
-				references rMaterialAnalog(Id)
-		)
-
-		--Create table rAnalog1CSpravLink
-		--(
-		--	[Id] int not null identity(1,1) primary key,
-		--	[IdAnalog] int not null,
-		--	Constraint FK_rAnalog1CSpravLink_rMaterialAnalog_Id foreign key (IdAnalog)
-		--		references rMaterialAnalog(Id),
-		--	[Id1CSprav] int not null,
-		--	Constraint FK_rAnalog1CSpravLink_r1CSprav_Id foreign key (Id1CSprav)
-		--		references r1CSprav(Id)
-		--)
-		--Create Unique nonclustered index IX_rAnalog1CSpravLink_IdAnalog_Id1CSprav on rAnalog1CSpravLink (IdAnalog, Id1CSprav)
-	end;
-
 -- определ€ем склады которые используютс€
 if OBJECT_ID (N'rSclad') is null
 	begin;
@@ -202,36 +168,6 @@ if OBJECT_ID (N'rSclad') is null
 			[Respons] nvarchar(100) not null
 		)
 	end; 
-
--- приходный ордер дл€ приходовани€ товара на склад
-if OBJECT_ID (N'rPrihod') is null
-	begin;
-		Create table rPrihod
-		(
-			[Id] int not null identity(1,1) primary key,
-			[IdSclad] int not null,
-			Constraint FK_rPrihod_rSclad_Id foreign key (IdSclad)
-				references rSclad(Id),
-			[Number] nvarchar(20) not null,
-			[Date] datetime not null
-		)
-	end;
-
--- спецификаци€ приходного ордера
-if OBJECT_ID (N'rPrihodSpec') is null 
-	begin;
-		Create table rPrihodSpec
-		(
-			[Id] int not null identity(1,1) primary key,
-			[IdPrihod] int not null,
-			Constraint FK_rPrihodSpec_rPrihod_Id foreign key (IdPrihod)	
-				references rPrihod(Id),
-			[Id1CSprav] int not null,
-			Constraint FK_rPrihodSpec_r1CSprav_Id foreign key (Id1CSprav)
-				references r1CSprav(Id),
-			[Nr] int not null
-		)
-	end;
 
 -- модификаци€ rMaterialRashod
 if not exists (
