@@ -293,6 +293,7 @@
     <Content Include="SQLscript\r1CActive.sql" />
     <Content Include="SQLscript\REPORTS LANSWEEPER.sql" />
     <Content Include="SQLscript\rScladMaterialOriginal.sql" />
+    <Content Include="SQLscript\Скрипт нормализации данных из прихода.sql" />
     <Content Include="SQLscript\Скрипт обновл количества по складам.sql" />
     <Content Include="SQLscript\Скрипт обновл номенкл по складам.sql" />
     <Content Include="SQLscript\Скрипты для подсчета баланса.sql" />

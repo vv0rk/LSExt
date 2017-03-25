@@ -22,11 +22,37 @@ if OBJECT_ID (N'rActiveCategory1') is null
 			[AssetId] int null,
 			Constraint FK_rActiveCategory1_rAsset_AssetId_AssetId foreign key (AssetId)
 				references rAsset (AssetId),
-			[nrSerial] nvarchar(50) null,
-			[nrInv] nvarchar(50) null,
-			[nrNom] nvarchar(50) null,
-			[Number] int not null default 1
+			[nrSerial] nvarchar(50) null,		-- серийный номер 
+			[nrInv] nvarchar(50) null,			-- инвентарный №
+			[nrNom] nvarchar(50) null,			-- номенклатурный №
+			[Number] int not null default 1,	-- количество 
+			/* Эти поля нужны для контроля */
+			[nomName] nvarchar(255) null,		-- имя номенклатуры из прихода
+			[nrAccount] nvarchar(20) null,		-- счет учета
+			[Company] nvarchar(50) null,		-- организация пользователь
+			[Gorod] nvarchar(50) null,			-- Город
+			[Address] nvarchar(255) null,		-- Адрес
+			[Office] nvarchar(100) null,		-- Помещение
+			[User] nvarchar(100) null,			-- ФИО пользователя
+			[Owner] nvarchar(100) null,			-- 
+			[CompanyOwner] nvarchar(50) null    
 		)
+	end;
+
+if not exists (
+			select * 
+			from sys.columns 
+			where name = N'nomName' and Object_ID = Object_ID(N'rActiveCategory1'))
+	begin;
+		Alter table rActiveCategory1 add nomName nvarchar(255) Null;
+		Alter table rActiveCategory1 add nrAccount nvarchar(20) Null;
+		Alter table rActiveCategory1 add Company nvarchar(50) Null;
+		Alter table rActiveCategory1 add Gorod nvarchar(50) Null;
+		Alter table rActiveCategory1 add Address nvarchar(255) Null;
+		Alter table rActiveCategory1 add Office nvarchar(100) Null;
+		Alter table rActiveCategory1 add [User] nvarchar(100) Null;
+		Alter table rActiveCategory1 add Owner nvarchar(100) Null;
+		Alter table rActiveCategory1 add CompanyOwner nvarchar(50) null;    
 	end;
 
 go
