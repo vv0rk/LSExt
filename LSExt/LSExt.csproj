@@ -256,6 +256,11 @@
     <Content Include="SQLscript\CreateTableModelDevices.sql" />
     <Content Include="SQLscript\rActiveCategory1.sql" />
     <Content Include="SQLscript\r1CSprav.sql" />
+    <Content Include="SQLscript\rCatalogUslugStatus.sql" />
+    <Content Include="SQLscript\rCatalogProgLink.sql" />
+    <Content Include="SQLscript\rCatalogProg.sql" />
+    <Content Include="SQLscript\rCatalogProgAddRecords.sql" />
+    <Content Include="SQLscript\rCatalogUslug.sql" />
     <Content Include="SQLscript\ScriptSyncronizeActiveCategory1.sql" />
     <Content Include="SQLscript\tblAssets.sql" />
     <Content Include="SQLscript\rCompany%24.sql" />
@@ -296,6 +301,7 @@
     <Content Include="SQLscript\Скрипт нормализации данных из прихода.sql" />
     <Content Include="SQLscript\Скрипт обновл количества по складам.sql" />
     <Content Include="SQLscript\Скрипт обновл номенкл по складам.sql" />
+    <Content Include="SQLscript\Скрипты для копирования с парент на детей.sql" />
     <Content Include="SQLscript\Скрипты для подсчета баланса.sql" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>

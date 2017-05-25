@@ -25,6 +25,26 @@ begin;
 	)
 end;
 
-alter table rCompany$ add IdCompanyDogovor int null;
-alter table rCompany$ add Constraint FK_rCompany_rCompanyDogovor_IdCompanyDogovor_Id foreign key (IdCompanyDogovor)
-			references rCompanyDogovor (Id);
+
+-- добавляем столбец IdCompanyDogovor для связи с таблицей договоров
+if not exists (
+			select * 
+			from sys.columns 
+			where name = N'IdCompanyDogovor')
+	begin;
+		alter table rCompany$ add IdCompanyDogovor int null;
+		-- добавляем Constraint 
+		alter table rCompany$ add Constraint FK_rCompany_rCompanyDogovor_IdCompanyDogovor_Id foreign key (IdCompanyDogovor)
+					references rCompanyDogovor (Id);
+	end;
+
+-- добавляем столбец ИНН 
+if not exists (
+			select * 
+			from sys.columns 
+			where name = N'INN')
+	begin;
+		alter table rCompany$ add INN nvarchar(30) null;
+		-- добавляем Constraint добавить уникальность невозможно так как не для всех организаций ИНН присутствует
+		--alter table rCompany$ add Constraint AK_rCompany_INN Unique(INN);
+	end;
