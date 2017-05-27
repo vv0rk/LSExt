@@ -256,6 +256,10 @@
     <Content Include="SQLscript\CreateTableModelDevices.sql" />
     <Content Include="SQLscript\rActiveCategory1.sql" />
     <Content Include="SQLscript\r1CSprav.sql" />
+    <Content Include="SQLscript\rAudit.sql" />
+    <Content Include="SQLscript\rAudit_TRIGGER.sql" />
+    <Content Include="SQLscript\rDvigAccount_TRIGGER.sql" />
+    <Content Include="SQLscript\rDvigAccount.sql" />
     <Content Include="SQLscript\rCatalogUslugStatus.sql" />
     <Content Include="SQLscript\rCatalogProgLink.sql" />
     <Content Include="SQLscript\rCatalogProg.sql" />
