@@ -38,6 +38,18 @@ begin;
 	)
 end;
 
+
+-- добавляем столбец CatalogUslugId
+if not exists (
+			select * 
+			from sys.columns 
+			where name = N'SerialNumber')
+	begin;
+		Alter table rAsset add SerialNumber nvarchar(100) Null;
+	end;
+
+
+
 /*
 	Скрипт для синхронизации объектов
 	добавления если чего то нет
