@@ -22,8 +22,19 @@ CREATE TABLE [dbo].rModelDevice
 		Constraint AK_Model UNIQUE(Model),
 	[IdManufacturer] INT,
 		Constraint FK_rManufacturer_rModelDevice_IdManufacturer FOREIGN KEY (IdManufacturer)
-			References rManufacturer (Id)
+			References rManufacturer (Id),
+	/*
+	Average Machine Life – средний срок жизни аппарата при соблюдении рекомендованной месячной нагрузки, 
+	использовании оригинальных расходных материалов, своевременной замене всех запасных (на 
+	соответствующие оригинальный производства Xerox) и ресурсных частей (на соответствующие 
+	оригинальный производства Xerox), использовании рекомендованных материалов для печати
+	*/
+	[Resource] int null	-- ресурс МФУ получено от производителя
 );
+
+
+Alter table rModelDevice add Resource int Null;
+
 
 -- Комплекты материалов на устройствах
 -- Материалы которые могут быть применены к устройствам.
