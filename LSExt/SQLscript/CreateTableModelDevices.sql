@@ -34,6 +34,7 @@ CREATE TABLE [dbo].rModelDevice
 
 
 Alter table rModelDevice add Resource int Null;
+Alter table rModelDevice add Recomend int Null;
 
 
 -- Комплекты материалов на устройствах
