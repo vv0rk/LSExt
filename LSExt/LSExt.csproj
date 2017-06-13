@@ -262,6 +262,9 @@
     <Content Include="SQLscript\rAudit.sql" />
     <Content Include="SQLscript\rAudit_TRIGGER.sql" />
     <Content Include="SQLscript\rAssetsImported.sql" />
+    <Content Include="SQLscript\rCPUrek.sql" />
+    <Content Include="SQLscript\rDvigLKStatus.sql" />
+    <Content Include="SQLscript\rDvigLKtype.sql" />
     <Content Include="SQLscript\rDvigStoredProcedure.sql" />
     <Content Include="SQLscript\rDvigLKspecLog.sql" />
     <Content Include="SQLscript\rNomenclature.sql" />
@@ -271,7 +274,6 @@
     <Content Include="SQLscript\rDvigAccount_TRIGGER.sql" />
     <Content Include="SQLscript\rDvigLKspec.sql" />
     <Content Include="SQLscript\rDvigLK.sql" />
-    <Content Include="SQLscript\rDvigControl.sql" />
     <Content Include="SQLscript\rCatalogUslugStatus.sql" />
     <Content Include="SQLscript\rCatalogProgLink.sql" />
     <Content Include="SQLscript\rCatalogProg.sql" />
